@@ -1,11 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
-const assetsDirectory = path.join(__dirname, 'assets');
 const componentsDirectory = path.join(__dirname, 'components');
 const stylesDirectory = path.join(__dirname, 'styles');
 const templateFile = path.join(__dirname, 'template.html');
 const projectDistDirectory = path.join(__dirname, 'project-dist');
+const assetsDirectory = path.join(__dirname, 'assets');
+const assetsDirCopy = path.join(projectDistDirectory, 'assets');
 
 fs.mkdir(projectDistDirectory, { recursive: true }, (error) => {
   if (error) return console.error(error.message);
@@ -28,7 +29,6 @@ function buildHtml(originalFile, pageComponentsDir) {
   
           fs.writeFile(path.join(projectDistDirectory, 'index.html'), templateHtmlData, (error) => {
             if (error) return console.error(error.message);
-            // console.log('File was created');
           })
         })
       }
@@ -54,21 +54,35 @@ function mergeStyles(originStylesDir) {
   })
 }
 
+function copyDirectory(copyFrom, copyTo) {
+  fs.mkdir(copyTo, { recursive: true }, (error) => {
+    if (error) return console.error(error.message);
+  })
+
+  fs.readdir(copyFrom, 'utf8', (error, directories) => {
+    if (error) return console.error(error.message);
+
+    for (const directory of directories) {
+      fs.readdir(path.join(copyFrom, directory), 'utf8', (error, files) => {
+        if (error) return console.error(error.message);
+
+        fs.mkdir(path.join(copyTo, directory), { recursive: true }, (error) => {
+          if (error) return console.error(error.message);
+
+          files.forEach((file) => {
+            const copyFileFrom = path.join(copyFrom, directory, file);
+            const copyFileTo = path.join(copyTo, directory, file);
+
+            fs.copyFile(copyFileFrom, copyFileTo, (error) => {
+              if (error) return console.error(error.message);
+            });
+          })
+        })
+      })
+    }
+  })
+}
+
 buildHtml(templateFile, componentsDirectory);
 mergeStyles(stylesDirectory);
-
-// fs.readdir(stylesDirectory, { withFileTypes: true }, (error, files) => {
-//   if (error) return console.error(error.message);
-//   let stylesString = '';
-//   const filteredFiles = files.filter((file) => file.isFile() && path.extname(file.name) === '.css');
-//   for (const file of filteredFiles) {
-//     fs.readFile(path.join(stylesDirectory, file.name), 'utf8', (error, data) => {
-//       if (error) return console.error(error.message);
-//       stylesString += data;
-
-//       fs.writeFile(path.join(projectDistDirectory, 'style.css'), stylesString, (error) => {
-//         if (error) return console.error(error.message);
-//       })
-//     })
-//   }
-// })
+copyDirectory(assetsDirectory, assetsDirCopy);
