@@ -8,11 +8,13 @@ const projectDistDirectory = path.join(__dirname, 'project-dist');
 const assetsDirectory = path.join(__dirname, 'assets');
 const assetsDirCopy = path.join(projectDistDirectory, 'assets');
 
-fs.mkdir(projectDistDirectory, { recursive: true }, (error) => {
-  if (error) return console.error(error.message);
-});
+
 
 function buildHtml(originalFile, pageComponentsDir) {
+  fs.mkdir(projectDistDirectory, { recursive: true }, (error) => {
+    if (error) return console.error(error.message);
+  });
+  
   fs.readFile(originalFile, 'utf8', (error, data) => {
     if (error) return console.error(error.message);
     let templateHtmlData = data;
