@@ -36,7 +36,26 @@ function buildHtml(originalFile, pageComponentsDir) {
   })
 }
 
+function mergeStyles(originStylesDir) {
+  fs.readdir(originStylesDir, { withFileTypes: true }, (error, files) => {
+    if (error) return console.error(error.message);
+    let stylesString = '';
+    const filteredFiles = files.filter((file) => file.isFile() && path.extname(file.name) === '.css');
+    for (const file of filteredFiles) {
+      fs.readFile(path.join(originStylesDir, file.name), 'utf8', (error, data) => {
+        if (error) return console.error(error.message);
+        stylesString += data;
+  
+        fs.writeFile(path.join(projectDistDirectory, 'style.css'), stylesString, (error) => {
+          if (error) return console.error(error.message);
+        })
+      })
+    }
+  })
+}
+
 buildHtml(templateFile, componentsDirectory);
+mergeStyles(stylesDirectory);
 
 // fs.readdir(stylesDirectory, { withFileTypes: true }, (error, files) => {
 //   if (error) return console.error(error.message);
