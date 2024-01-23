@@ -23,17 +23,27 @@ function buildHtml(originalFile, pageComponentsDir) {
       if (error) return console.error(error.message);
       const filteredComponents = componentFiles.filter((file) => path.extname(file.name) === '.html');
   
-      for (const component of filteredComponents) {
-        fs.readFile(path.join(pageComponentsDir, component.name), 'utf-8', (error, componentData) => {
+      fs.readFile(path.join(pageComponentsDir, filteredComponents[0].name), 'utf-8', (error, componentData) => {
+        if (error) return console.error(error.message);
+        const compName = filteredComponents[0].name.split('.')[0];
+        templateHtmlData = templateHtmlData.replace(`{{${compName}}}`, componentData.toString());
+
+        fs.readFile(path.join(pageComponentsDir, filteredComponents[1].name), 'utf-8', (error, componentData) => {
           if (error) return console.error(error.message);
-          const compName = component.name.split('.')[0];
+          const compName = filteredComponents[1].name.split('.')[0];
           templateHtmlData = templateHtmlData.replace(`{{${compName}}}`, componentData.toString());
   
-          fs.writeFile(path.join(projectDistDirectory, 'index.html'), templateHtmlData, (error) => {
+          fs.readFile(path.join(pageComponentsDir, filteredComponents[2].name), 'utf-8', (error, componentData) => {
             if (error) return console.error(error.message);
+            const compName = filteredComponents[2].name.split('.')[0];
+            templateHtmlData = templateHtmlData.replace(`{{${compName}}}`, componentData.toString());
+    
+            fs.writeFile(path.join(projectDistDirectory, 'index.html'), templateHtmlData, (error) => {
+              if (error) return console.error(error.message);
+            })
           })
         })
-      }
+      })
     })
   })
 }
